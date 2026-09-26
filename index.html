@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARCA — Central de Monitoramento</title>
+<meta name="description" content="ARCA — plataforma de monitoramento de robô ambiental, coleta de resíduos e qualidade da água.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<aside class="side" id="side">
+  <div class="brand"><span>ARCA</span><small>ENVIRONMENTAL ROBOTICS</small></div>
+  <div class="navtitle">MONITORAMENTO</div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard"><span class="ico">⌂</span>Dashboard</button>
+    <button data-page="robot"><span class="ico">🤖</span>Robô</button>
+    <button data-page="water"><span class="ico">◉</span>Qualidade da Água</button>
+    <button data-page="collection"><span class="ico">♻</span>Coleta</button>
+    <button data-page="reports"><span class="ico">▥</span>Relatórios</button>
+    <button data-page="map"><span class="ico">⌖</span>Mapa</button>
+    <button data-page="camera"><span class="ico">▣</span>Câmera</button>
+  </nav>
+  <div class="navtitle">SISTEMA</div>
+  <nav class="nav"><button data-page="settings"><span class="ico">⚙</span>Configurações</button></nav>
+  <div class="demo">🟡 <b>MODO DEMONSTRAÇÃO</b><br><span>Os valores simulados são usados somente enquanto o Firebase não fornece dados.</span></div>
+</aside>
+
+<main>
+ <div class="top"><div style="display:flex;gap:10px;align-items:center"><button class="hamb" id="hamb">☰</button><span class="crumb">ARCA / <span id="crumb">DASHBOARD</span></span></div><div class="topright"><span class="pill">🕒 <span id="clock">--:--:--</span></span><span class="pill">🔋 <span id="topBattery">78%</span></span><span class="pill online">● SISTEMA ONLINE</span></div></div>
+
+
+  <div class="card connection-panel" id="connectionPanel">
+   <div>
+    <div class="label">CONEXÃO DE DADOS</div>
+    <b id="connectionStatus">MODO DEMONSTRAÇÃO</b>
+    <span class="sub" id="connectionDetail">Aguardando conexão com o ESP32.</span>
+   </div>
+   <div class="connection-actions">
+    <button class="btn" id="connectBtn">Conectar</button>
+    <button class="btn" id="demoBtn">Dados de teste</button>
+   </div>
+  </div>
+
+ <section class="page active" id="page-dashboard">
+  <div class="title"><div><div class="label">VISÃO GERAL</div><h1>Central de Monitoramento</h1><p>Acompanhe o robô, a qualidade da água e a operação de coleta.</p></div><div class="actions"><button class="btn primary" onclick="showPage('robot')">Abrir robô →</button></div></div>
+  <div class="grid kpi">
+   <div class="card"><div class="label">Bateria</div><div class="value" id="batteryValue">78%</div><div class="sub ok">● Boa</div><div class="progress"><i style="width:78%"></i></div></div>
+   <div class="card"><div class="label">Temperatura</div><div class="value" id="temperatureValue">24,3 °C</div><div class="sub">↓ 0,4 °C nas últimas 2h</div></div>
+   <div class="card"><div class="label">pH</div><div class="value" id="phValue">7,2</div><div class="sub ok">● NORMAL</div></div>
+   <div class="card"><div class="label">Turbidez</div><div class="value" id="turbidityValue">1,8 NTU</div><div class="sub ok">● NORMAL</div></div>
+   <div class="card"><div class="label">TDS</div><div class="value" id="tdsValue">-- ppm</div><div class="sub">Sólidos dissolvidos</div></div>
+   <div class="card"><div class="label">Turbidez ADC</div><div class="value" id="turbidityAdcValue">--</div><div class="sub">Leitura bruta do sensor</div></div>
+  </div>
+  <div class="grid two">
+   <div class="card chartbox"><div class="head"><b>Qualidade da água — últimas 24 horas</b><select class="select" id="chartMetric"><option>Temperatura</option><option>pH</option><option>Turbidez</option><option>TDS</option><option>Oxigênio dissolvido</option><option>Condutividade</option><option>ORP</option></select></div><canvas id="mainChart"></canvas></div>
+   <div class="card"><div class="head"><b>Status do sistema</b><span class="tag">ONLINE</span></div>
+    <div class="statusrow"><span>GPS</span><span class="tag">Conectado</span></div>
+    <div class="statusrow"><span>Wi-Fi</span><span class="tag">Conectado</span></div>
+    <div class="statusrow"><span>Modo</span><b>AUTÔNOMO</b></div>
+    <div class="statusrow"><span>Compartimento</span><span class="tag yellow">64%</span></div>
+    <div class="statusrow"><span>Última leitura</span><span>agora</span></div>
+   </div>
+  </div>
+  <div class="grid three">
+   <div class="card"><div class="label">Resíduos hoje</div><div class="bigmetric">12,8 kg</div><div class="sub ok">↑ 14% vs. ontem</div></div>
+   <div class="card"><div class="label">Ciclos realizados</div><div class="bigmetric">37</div><div class="sub">nesta operação</div></div>
+   <div class="card"><div class="label">Eficiência de coleta</div><div class="bigmetric">86%</div><div class="sub">estimativa demonstrativa</div></div>
+  </div>
+ </section>
+
+ <section class="page" id="page-water">
+  <div class="title"><div><div class="label">SENSORES</div><h1>Qualidade da Água</h1><p>Leituras ambientais e indicadores de condição.</p></div></div>
+  <div class="grid sensor-grid">
+   <div class="card sensor"><div class="label">Temperatura</div><div class="value">24,3 °C</div><div class="range"><i style="width:48%"></i></div><div class="sub">Mín 20° · Máx 60° · <span class="ok">NORMAL</span></div></div>
+   <div class="card sensor"><div class="label">pH</div><div class="value">7,2</div><div class="range"><i style="width:51%"></i></div><div class="sub">Faixa 6,0–9,5 · <span class="ok">NORMAL</span></div></div>
+   <div class="card sensor"><div class="label">Turbidez</div><div class="value">1,8 NTU</div><div class="range"><i style="width:26%"></i></div><div class="sub">Referência &lt; 5 NTU · <span class="ok">NORMAL</span></div></div>
+   <div class="card sensor"><div class="label">TDS</div><div class="value">-- ppm</div><div class="range"><i style="width:0%"></i></div><div class="sub">Sólidos dissolvidos · <span class="ok">LEITURA</span></div></div>
+   <div class="card sensor"><div class="label">Turbidez ADC</div><div class="value" id="turbidityAdcValue">--</div><div class="range"><i style="width:0%"></i></div><div class="sub">Leitura bruta · <span class="ok">LEITURA</span></div></div>
+   <div class="card sensor"><div class="label">Turbidez tensão</div><div class="value" id="turbidityVoltageValue">-- V</div><div class="range"><i style="width:0%"></i></div><div class="sub">Tensão lida pelo ESP32</div></div>
+   <div class="card sensor"><div class="label">Status Firebase</div><div class="value">--</div><div class="range"><i style="width:100%"></i></div><div class="sub">Dados em tempo real</div></div>
+   <div class="card sensor"><div class="label">Temperatura</div><div class="value" id="temperatureWaterDuplicate">-- °C</div><div class="range"><i style="width:0%"></i></div><div class="sub">Leitura do DS18B20</div></div>
+  </div>
+  <div class="grid two">
+   <div class="card chartbox"><div class="head"><b>Histórico de parâmetros</b><select class="select" id="waterMetric"><option>pH</option><option>Temperatura</option><option>Turbidez</option><option>TDS</option><option>O₂ dissolvido</option><option>ORP</option></select></div><canvas id="waterChart"></canvas></div>
+   <div class="card"><div class="head"><b>Últimas leituras</b></div><table class="table"><tr><th>Parâmetro</th><th>Atual</th><th>Status</th></tr><tr><td>pH</td><td id="phTableValue">--</td><td class="ok">RECEBENDO</td></tr><tr><td>Temperatura</td><td id="temperatureTableValue">-- °C</td><td class="ok">RECEBENDO</td></tr><tr><td>Turbidez</td><td id="turbidityTableValue">-- NTU</td><td class="ok">RECEBENDO</td></tr><tr><td>TDS</td><td id="tdsTableValue">-- ppm</td><td class="ok">RECEBENDO</td></tr><tr><td>Turbidez tensão</td><td id="turbidityVoltageTableValue">-- V</td><td class="ok">RECEBENDO</td></tr></table></div>
+  </div>
+ </section>
+
+ <section class="page" id="page-collection">
+  <div class="title"><div><div class="label">SUSTENTABILIDADE</div><h1>Coleta de Resíduos</h1><p>Desempenho operacional da coleta de materiais flutuantes.</p></div></div>
+  <div class="grid kpi" style="grid-template-columns:repeat(4,1fr)">
+   <div class="card"><div class="label">Hoje</div><div class="value">12,8 kg</div><div class="sub">resíduos coletados</div></div>
+   <div class="card"><div class="label">Este mês</div><div class="value">184 kg</div><div class="sub">total acumulado</div></div>
+   <div class="card"><div class="label">Ciclos</div><div class="value">37</div><div class="sub">operações completas</div></div>
+   <div class="card"><div class="label">Capacidade</div><div class="value">64%</div><div class="progress"><i style="width:64%"></i></div></div>
+  </div>
+  <div class="grid two">
+   <div class="card chartbox"><div class="head"><b>Resíduos coletados por dia</b><span class="tag">kg</span></div><canvas id="barChart"></canvas></div>
+   <div class="card chartbox"><div class="head"><b>Tipos de resíduos</b><span class="tag">MODO DEMO</span></div><canvas id="donutChart"></canvas></div>
+  </div>
+ </section>
+
+ <section class="page" id="page-robot">
+  <div class="title"><div><div class="label">CONTROLE</div><h1>Robô ARCA</h1><p>Estado, telemetria e controle do veículo flutuante.</p></div><div class="actions"><span class="pill online">● OPERACIONAL</span></div></div>
+  <div class="robot">
+   <div class="card robotview">
+    <img src="prototipo.jpg" alt="Protótipo conceitual do robô ARCA" onerror="this.style.display='none';document.getElementById('robotPlaceholder').style.display='block'">
+    <div id="robotPlaceholder" class="robot-placeholder" style="display:none">🤖</div>
+   </div>
+   <div class="card">
+    <div class="head"><b>Telemetria</b><span class="tag">ONLINE</span></div>
+    <div class="statusrow"><span>Modo</span><b>AUTÔNOMO</b></div>
+    <div class="statusrow"><span>Velocidade</span><b id="gpsSpeedValue">0,7 m/s</b></div>
+    <div class="statusrow"><span>Bateria</span><b class="ok" id="robotBattery">78%</b></div>
+    <div class="statusrow"><span>Temp. interna</span><b id="internalTemp">31 °C</b></div>
+    <div class="statusrow"><span>Compartimento</span><b id="compartmentValue">64%</b></div>
+    <div class="statusrow"><span>GPS</span><span class="tag">Conectado</span></div>
+    <div class="statusrow"><span>Comunicação</span><b>Wi-Fi</b></div>
+    <div class="control"><button>▲</button><button>▲</button><button>▲</button><button>◀</button><button class="stop">⏹</button><button>▶</button><button>▼</button><button>▼</button><button>▼</button></div>
+    <button class="emergency" onclick="alert('PARADA DE EMERGÊNCIA acionada — demonstração')">🚨 PARADA DE EMERGÊNCIA</button>
+   </div>
+  </div>
+ </section>
+
+ <section class="page" id="page-map">
+  <div class="title"><div><div class="label">LOCALIZAÇÃO</div><h1>Mapa e Trajetória</h1><p>Visualização demonstrativa da posição e do percurso do ARCA.</p></div><button class="btn" onclick="alert('Mapa centralizado no robô — demonstração')">⌖ Centralizar robô</button></div>
+  <div class="grid two">
+   <div class="map"><div class="route"></div><div class="marker">🤖</div><div class="mapinfo"><b>ARCA</b><br>Lat: <span id="mapLat">-23.5505</span><br>Long: <span id="mapLon">-46.6333</span><br>Velocidade: <span id="mapSpeed">0,7 m/s</span><br>Distância: <span id="mapDistance">2,4 km</span></div></div>
+   <div class="card"><div class="head"><b>Telemetria GPS</b></div><div class="statusrow"><span>Latitude</span><b id="latitudeValue">-23.5505</b></div><div class="statusrow"><span>Longitude</span><b id="longitudeValue">-46.6333</b></div><div class="statusrow"><span>Velocidade</span><b id="gpsSpeedValue">0,7 m/s</b></div><div class="statusrow"><span>Distância percorrida</span><b id="distanceValue">2,4 km</b></div><div class="statusrow"><span>Tempo de operação</span><b>01:42:18</b></div><div class="statusrow"><span>Satélites</span><b class="ok" id="satellitesValue">9</b></div></div>
+  </div>
+ </section>
+
+ <section class="page" id="page-camera">
+  <div class="title"><div><div class="label">VISÃO</div><h1>Câmera do Robô</h1><p>Interface preparada para transmissão futura da ESP32-CAM.</p></div><span class="pill"><span class="live">● AO VIVO</span> · ESP32-CAM</span></div>
+  <div class="camera"><div class="water"></div><div class="reticle"></div><div class="camera-top"><span>ARCA-CAM 01</span><span>1080p · 30 FPS</span></div><div class="camera-bottom"><span>03/09/2026 · 11:42:18</span><span>LATÊNCIA: -- ms</span></div></div>
+  <div class="actions" style="margin-top:12px"><button class="btn">⛶ Tela cheia</button><button class="btn">◉ Capturar imagem</button><button class="btn">● Gravar</button><button class="btn">＋ Zoom</button></div>
+ </section>
+
+ <section class="page" id="page-reports">
+  <div class="title"><div><div class="label">ANÁLISE</div><h1>Relatórios</h1><p>Histórico ambiental e operacional.</p></div><div class="reportfilters"><button class="btn active">Hoje</button><button class="btn">7 dias</button><button class="btn">30 dias</button><button class="btn">Personalizado</button><button class="btn primary">↓ Exportar relatório</button></div></div>
+  <div class="grid two"><div class="card chartbox"><div class="head"><b>Relatório ambiental</b><span class="tag">24h</span></div><canvas id="reportChart"></canvas></div><div class="card chartbox"><div class="head"><b>Operação de coleta</b></div><canvas id="reportBar"></canvas></div></div>
+  <div class="grid three"><div class="card"><div class="label">Quantidade coletada</div><div class="bigmetric">184 kg</div></div><div class="card"><div class="label">Distância percorrida</div><div class="bigmetric">21,6 km</div></div><div class="card"><div class="label">Tempo de operação</div><div class="bigmetric">16,4 h</div></div></div>
+ </section>
+
+ <section class="page" id="page-settings">
+  <div class="title"><div><div class="label">SISTEMA</div><h1>Configurações</h1><p>Parâmetros do robô, sensores e comunicação.</p></div><button class="btn primary">Salvar alterações</button></div>
+  <div class="settings">
+   <div class="card"><div class="head"><b>Integração de dados</b></div>
+    <div class="field"><span>WebSocket</span><input class="data-input" id="wsUrl" value="ws://192.168.1.50:81"></div>
+    <div class="field"><span>API REST</span><input class="data-input" id="apiUrl" value="http://192.168.1.50/api"></div>
+    <div class="field"><span>Intervalo</span><b>1 s</b></div>
+   </div>
+
+   <div class="card"><div class="head"><b>Robô</b></div><div class="field"><span>Nome</span><b>ARCA</b></div><div class="field"><span>ID</span><b>ARCA-001</b></div><div class="field"><span>Modo de operação</span><b>AUTÔNOMO</b></div><div class="field"><span>Velocidade máxima</span><b>1,0 m/s</b></div></div>
+   <div class="card"><div class="head"><b>Sensores</b></div><div class="field"><span>Intervalo de leitura</span><b>5 s</b></div><div class="field"><span>Calibração automática</span><div class="switch on"><i></i></div></div><div class="field"><span>Alertas de limite</span><div class="switch on"><i></i></div></div></div>
+   <div class="card"><div class="head"><b>Comunicação</b></div><div class="field"><span>Wi-Fi</span><b class="ok">Conectado</b></div><div class="field"><span>IP</span><b>192.168.1.50</b></div><div class="field"><span>Servidor</span><b>API-ARCA</b></div><div class="field"><span>Frequência</span><b>1 s</b></div></div>
+   <div class="card"><div class="head"><b>Sistema</b></div><div class="field"><span>Tema</span><b>Escuro</b></div><div class="field"><span>Notificações</span><div class="switch on"><i></i></div></div><div class="field"><span>Atualização automática</span><div class="switch on"><i></i></div></div></div>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="head"><b>Arquitetura de dados</b></div><div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:22px"><span class="pill">🧪 SENSORES</span><b>→</b><span class="pill">🧠 ESP32</span><b>→</b><span class="pill">⚡ PROCESSAMENTO</span><b>→</b><span class="pill">📡 Wi-Fi / 4G</span><b>→</b><span class="pill">☁ SERVIDOR</span><b>→</b><span class="pill">📊 DASHBOARD</span></div></div>
+ </section>
+
+ <div class="card" style="margin-top:14px" id="globalAlerts"><div class="head"><b>🔔 Alertas recentes</b><span class="tag yellow">6 eventos</span></div><div class="alerts"><div class="alert"><div class="aicon">🟢</div><div><strong>Sistema iniciado</strong><span>Agora · operação normal.</span></div></div><div class="alert"><div class="aicon">🟢</div><div><strong>GPS conectado</strong><span>Agora · 9 satélites disponíveis.</span></div></div><div class="alert"><div class="aicon">🟡</div><div><strong>Compartimento 64% cheio</strong><span>Há capacidade disponível para continuar.</span></div></div><div class="alert"><div class="aicon">🟡</div><div><strong>Modo demonstração ativo</strong><span>Valores exibidos não são medições reais.</span></div></div></div></div>
+ <footer>ARCA · Tecnologia inteligente para águas mais limpas · Protótipo acadêmico/demonstrativo</footer>
+</main>
+</div>
+
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
